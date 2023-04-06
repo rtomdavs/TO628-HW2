@@ -161,7 +161,7 @@ forestmodel <- randomForest(as.factor(yyes) ~., data = tele_train_full)
 ## Random Forest Model
 ```{r}
 forest_pred <- predict(forestmodel, tele_test_full)
-forest_bin <- ifelse(forest_pred )
+
 confusionMatrix(as.factor(forest_pred), as.factor(tele_test_full$yyes), positive = "1")
 
 #Kappa for this model is 0.3124
@@ -172,28 +172,38 @@ confusionMatrix(as.factor(forest_pred), as.factor(tele_test_full$yyes), positive
 
 ## Adding Prediction Columns for Every Model
 ```{r}
-#tele_test_full$LogPred <- predbin_log
-#tele_test_full$KNNPred <- KNNmodel
-#tele_test_full$KNNPred <- ifelse(tele_test_full$KNNPred == "1", 1, 0)
-#tele_test_full$ANNPred <- predbin_ann
+library(dplyr)
 
 telestack <- data.frame(tele_test_full$yyes, LogPred, KNNmodel, ann_pred, tree_pred, forest_pred)
+
+colnames(telestack)[1] = "yyes"
+colnames(telestack)[3] = "KNNPred"
+colnames(telestack)[4] = "ANNPred"
+colnames(telestack)[5] = "TreePred"
+colnames(telestack)[6] = "ForestPred"
 
 summary(telestack)
 ```
 
-## Averaging the Predictions
+## Test and Train for Telestack
 ```{r}
-tele_test_full$FinalPred <- ifelse((
-    (tele_test_full$LogPred + tele_test_full$KNNPred + tele_test_full$ANNPred) / 3) >= 0.6, 1, 0)
+set.seed(12345)
+trainrows <- sample(nrow(telestack), 0.8*nrow(telestack))
 
-confusionMatrix(as.factor(tele_test_full$FinalPred), as.factor(tele_test_full$yyes), positive = "1")
+tt_train <- telestack[trainrows, ]
+tt_test <- telestack[-trainrows, ]
 ```
 
-## Final Profit from Our Combined Model
+## Decision Tree on Telestack
 ```{r}
-Profit <- 
-Profit
+tt_tree <- C5.0(as.factor(yyes) ~., data = tt_train)
+```
+
+## Evaluating Decision Tree on Telestack
+```{r}
+tt_tree_pred <- predict(tt_tree, tt_test)
+
+confusionMatrix(as.factor(tt_tree_pred), as.factor(tt_test$yyes), positive = "1")
 ```
 
 
