@@ -32,6 +32,8 @@ tele$X <- NULL
 # Changing pdays to a dummy and deleting pdays
 tele$pdaysdummy <- ifelse(tele$pdays == 999, 0, 1)
 tele$pdays <- NULL
+
+summary(tele)
 ```
 
 ## Getting Data Ready for Analysis
@@ -159,9 +161,10 @@ forestmodel <- randomForest(as.factor(yyes) ~., data = tele_train_full)
 ## Random Forest Model
 ```{r}
 forest_pred <- predict(forestmodel, tele_test_full)
-confusionMatrix(as.factor(tree_pred), as.factor(tele_test_full$yyes), positive = "1")
+forest_bin <- ifelse(forest_pred )
+confusionMatrix(as.factor(forest_pred), as.factor(tele_test_full$yyes), positive = "1")
 
-#Kappa for this model is 0.3623
+#Kappa for this model is 0.3124
 ```
 
 
@@ -169,10 +172,14 @@ confusionMatrix(as.factor(tree_pred), as.factor(tele_test_full$yyes), positive =
 
 ## Adding Prediction Columns for Every Model
 ```{r}
-tele_test_full$LogPred <- predbin_log
-tele_test_full$KNNPred <- KNNmodel
-tele_test_full$KNNPred <- ifelse(tele_test_full$KNNPred == "1", 1, 0)
-tele_test_full$ANNPred <- predbin_ann
+#tele_test_full$LogPred <- predbin_log
+#tele_test_full$KNNPred <- KNNmodel
+#tele_test_full$KNNPred <- ifelse(tele_test_full$KNNPred == "1", 1, 0)
+#tele_test_full$ANNPred <- predbin_ann
+
+telestack <- data.frame(tele_test_full$yyes, predbin_log, KNNmodel, predbin_ann, tree_pred, forest_pred)
+
+summary(telestack)
 ```
 
 ## Averaging the Predictions
