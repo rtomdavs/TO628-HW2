@@ -177,7 +177,7 @@ confusionMatrix(as.factor(forest_pred), as.factor(tele_test_full$yyes), positive
 #tele_test_full$KNNPred <- ifelse(tele_test_full$KNNPred == "1", 1, 0)
 #tele_test_full$ANNPred <- predbin_ann
 
-telestack <- data.frame(tele_test_full$yyes, predbin_log, KNNmodel, predbin_ann, tree_pred, forest_pred)
+telestack <- data.frame(tele_test_full$yyes, LogPred, KNNmodel, ann_pred, tree_pred, forest_pred)
 
 summary(telestack)
 ```
