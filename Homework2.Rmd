@@ -197,6 +197,8 @@ tt_test <- telestack[-trainrows, ]
 ## Decision Tree on Telestack
 ```{r}
 tt_tree <- C5.0(as.factor(yyes) ~., data = tt_train)
+
+plot(tt_tree)
 ```
 
 ## Evaluating Decision Tree on Telestack
