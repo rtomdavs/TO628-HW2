@@ -222,12 +222,12 @@ errorpred <- predict(errormodel, tele_test_full)
 confusionMatrix(as.factor(errorpred), as.factor(tele_test_full$yyes), positive = "1")
 ```
 
-## Logistic Regression Model Creation
+## Improved Logistic Regression Model Creation
 ```{r}
 LogModel2 <- lm(yyes ~ ., data = tele_train_full)
 ```
 
-## Logistic Model Testing
+## Improved Logistic Model Testing
 ```{r}
 library(caret)
 LogPred2 <- predict(LogModel2, tele_test_full)
@@ -237,7 +237,7 @@ confusionMatrix(as.factor(predbin_log2), as.factor(tele_test_full$yyes), positiv
 #Kappa for this model = 0.4123
 ```
 
-## KNN Model Creation
+## Improved KNN Model Creation
 ```{r, cache=TRUE}
 library(class)
 
@@ -245,7 +245,7 @@ library(class)
 KNNmodel2 <- knn(tele_train, tele_test, tele_train_labels, k = 50)
 ```
 
-## KNN Model Testing
+## Improved KNN Model Testing
 ```{r}
 confusionMatrix(as.factor(KNNmodel2), as.factor(tele_test_labels), positive = "1")
 
@@ -253,7 +253,7 @@ confusionMatrix(as.factor(KNNmodel2), as.factor(tele_test_labels), positive = "1
 ```
 
 
-## ANN Model Creation
+## Improved ANN Model Creation
 ```{r, cache= TRUE}
 # install.packages('neuralnet')
 library(neuralnet)
@@ -261,7 +261,7 @@ model_ann2 <- neuralnet(yyes ~ ., data = tele_train_full, hidden = 1)
 plot(model_ann2)
 ```
 
-## ANN Model Testing
+## Improved ANN Model Testing
 ```{r, cache= TRUE}
 library (caret)
 ann_pred2 <- predict(model_ann2, tele_test_full)
@@ -272,7 +272,7 @@ confusionMatrix(as.factor(predbin_ann2), as.factor(tele_test_full$yyes), positiv
 ```
 
 
-## Random Forest Model Creation
+## Improved Random Forest Model Creation
 ```{r}
 library(randomForest)
 
@@ -280,7 +280,7 @@ forestmodel2 <- randomForest(as.factor(yyes) ~., data = tele_train_full, costs =
 ```
 
 
-## Random Forest Model
+## Improved Random Forest Model
 ```{r}
 forest_pred2 <- predict(forestmodel2, tele_test_full)
 
@@ -288,3 +288,36 @@ confusionMatrix(as.factor(forest_pred2), as.factor(tele_test_full$yyes), positiv
 
 #Kappa for this model is 0.3124
 ```
+
+# Combining Improved Models
+
+## Adding Prediction Columns for Every Model
+```{r}
+library(dplyr)
+
+telestack2 <- data.frame(tele_test_full$yyes, LogPred2, KNNmodel2, ann_pred2, tree_pred2, forest_pred2)
+
+colnames(telestack)[1] = "yyes"
+colnames(telestack)[3] = "KNNPred"
+colnames(telestack)[4] = "ANNPred"
+colnames(telestack)[5] = "TreePred"
+colnames(telestack)[6] = "ForestPred"
+
+summary(telestack)
+```
+
+## Test and Train for Telestack
+```{r}
+set.seed(12345)
+trainrows <- sample(nrow(telestack2), 0.8*nrow(telestack))
+
+tt_train2 <- telestack2[trainrows, ]
+tt_test2 <- telestack2[-trainrows, ]
+```
+
+## Decision Tree on Telestack
+```{r}
+tt_tree2 <- C5.0(as.factor(yyes) ~., data = tt_train2)
+
+plot(tt_tree2)
+
