@@ -209,3 +209,82 @@ confusionMatrix(as.factor(tt_tree_pred), as.factor(tt_test$yyes), positive = "1"
 ```
 
 
+# Building Our Improved Models
+
+# Adding Cost Matrix to Decision Tree
+```{r}
+error_cost = matrix(c(0, 1, 6, 0), nrow = 2)
+error_cost
+
+errormodel <- C5.0(as.factor(yyes) ~., data = tele_train_full, costs = error_cost)
+
+errorpred <- predict(errormodel, tele_test_full)
+confusionMatrix(as.factor(errorpred), as.factor(tele_test_full$yyes), positive = "1")
+```
+
+## Logistic Regression Model Creation
+```{r}
+LogModel2 <- lm(yyes ~ ., data = tele_train_full)
+```
+
+## Logistic Model Testing
+```{r}
+library(caret)
+LogPred2 <- predict(LogModel2, tele_test_full)
+predbin_log2 <- ifelse(LogPred2 >= 0.2, 1, 0)
+confusionMatrix(as.factor(predbin_log2), as.factor(tele_test_full$yyes), positive = "1")
+
+#Kappa for this model = 0.4123
+```
+
+## KNN Model Creation
+```{r, cache=TRUE}
+library(class)
+
+#Output is the prediction for the testing dataset
+KNNmodel2 <- knn(tele_train, tele_test, tele_train_labels, k = 50)
+```
+
+## KNN Model Testing
+```{r}
+confusionMatrix(as.factor(KNNmodel2), as.factor(tele_test_labels), positive = "1")
+
+#Kappa for this model = 0.1989
+```
+
+
+## ANN Model Creation
+```{r, cache= TRUE}
+# install.packages('neuralnet')
+library(neuralnet)
+model_ann2 <- neuralnet(yyes ~ ., data = tele_train_full, hidden = 1)
+plot(model_ann2)
+```
+
+## ANN Model Testing
+```{r, cache= TRUE}
+library (caret)
+ann_pred2 <- predict(model_ann2, tele_test_full)
+predbin_ann2 <- ifelse(ann_pred2 >= 0.2, 1, 0)
+confusionMatrix(as.factor(predbin_ann2), as.factor(tele_test_full$yyes), positive = "1")
+
+#Kappa for this model = 0.3072
+```
+
+
+## Random Forest Model Creation
+```{r}
+library(randomForest)
+
+forestmodel2 <- randomForest(as.factor(yyes) ~., data = tele_train_full, costs = error_cost)
+```
+
+
+## Random Forest Model
+```{r}
+forest_pred2 <- predict(forestmodel2, tele_test_full)
+
+confusionMatrix(as.factor(forest_pred2), as.factor(tele_test_full$yyes), positive = "1")
+
+#Kappa for this model is 0.3124
+```
